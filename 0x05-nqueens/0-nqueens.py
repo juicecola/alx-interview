@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """
 N Queens Puzzle Solver
 
@@ -16,50 +16,30 @@ Example:
     $ ./nqueens.py 4
     [[0, 1], [1, 3], [2, 0], [3, 2]]
     [[0, 2], [1, 0], [2, 3], [3, 1]]
-
-    $ ./nqueens.py 6
-    [[0, 1], [1, 3], [2, 5], [3, 0], [4, 2], [5, 4]]
-    [[0, 2], [1, 5], [2, 1], [3, 4], [4, 0], [5, 3]]
-    [[0, 3], [1, 0], [2, 4], [3, 1], [4, 5], [5, 2]]
-    [[0, 4], [1, 2], [2, 0], [3, 5], [4, 3], [5, 1]]
 """
 
 import sys
-import argparse
 
-def is_safe(queen, x, array):
-    """
-    Check if placing a queen at position (queen, x) is safe.
-
-    Args:
-        queen (int): The row position of the queen.
-        x (int): The column position of the queen.
-        array (List[List[int]]): The current board configuration.
-
-    Returns:
-        bool: True if placing the queen at (queen, x) is safe, False otherwise.
-    """
-    return all(abs(array[column] - x) != queen - column for column in range(queen))
-
-def generate_solutions(row, column, prev_solution):
+def generate_solutions(row, column):
     """
     Generate all solutions for the N Queens problem using backtracking.
 
     Args:
-        row (int): The row position of the current queen to be placed.
+        row (int): The current row position of the queen to be placed.
         column (int): The size of the chessboard and the number of queens.
-        prev_solution (List[List[int]]): The previously placed queens' positions.
 
     Returns:
         List[List[int]]: A list of all possible solutions for the N Queens problem.
     """
     if row == column:
-        return prev_solution
-    solution = []
-    for queen in range(column):
-        if all(is_safe(row, queen, array) for array in prev_solution):
-            solution.extend(place_queen(queen, column, prev_solution))
-    return generate_solutions(row + 1, column, solution)
+        return [[]]  # Base case, return an empty board with no queens placed
+    prev_solution = generate_solutions(row + 1, column)
+    safe_position = []
+    for array in prev_solution:
+        for x in range(column):
+            if is_safe(row, x, array):
+                safe_position.append(array + [x])
+    return safe_position
 
 def place_queen(queen, column, prev_solution):
     """
@@ -75,22 +55,57 @@ def place_queen(queen, column, prev_solution):
     """
     return [array + [queen] for array in prev_solution]
 
-def main():
+def is_safe(q, x, array):
     """
-    Main function to solve the N Queens problem and print the solutions.
-    """
-    parser = argparse.ArgumentParser(description="Solves the N Queens problem.")
-    parser.add_argument("N", type=int, help="The size of the chessboard and the number of queens.")
-    args = parser.parse_args()
+    Check if placing a queen at position (q, x) is safe.
 
-    if args.N < 4:
+    Args:
+        q (int): The row position of the queen.
+        x (int): The column position of the queen.
+        array (List[int]): The current board configuration.
+
+    Returns:
+        bool: True if placing the queen at (q, x) is safe, False otherwise.
+    """
+    if x in array:
+        return False
+    else:
+        return all(abs(array[column] - x) != q - column for column in range(q))
+
+def init():
+    """
+    Initialize the N Queens problem with user input.
+
+    Returns:
+        int: The size of the chessboard and the number of queens (N).
+    """
+    if len(sys.argv) != 2:
+        print("Usage: nqueens N")
+        sys.exit(1)
+    if sys.argv[1].isdigit():
+        n = int(sys.argv[1])
+    else:
+        print("N must be a number")
+        sys.exit(1)
+    if n < 4:
         print("N must be at least 4")
         sys.exit(1)
+    return n
 
-    solutions = generate_solutions(0, args.N, [[]])
+def n_queens():
+    """
+    Solve and print the N Queens problem.
+    """
+    n = init()
+    # Generate all solutions
+    solutions = generate_solutions(0, n)
+    # Print solutions
     for array in solutions:
-        print(array)
+        clean = []
+        for q, x in enumerate(array):
+            clean.append([q, x])
+        print(clean)
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    n_queens()
 
