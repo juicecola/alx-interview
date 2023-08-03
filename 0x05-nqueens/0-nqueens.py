@@ -1,103 +1,96 @@
-#!/usr/bin/python3
-"""N Queens placement on NxN chessboard"""
+#!/usr/bin/env python3
+"""
+N Queens Puzzle Solver
 
+This program solves the N Queens problem, which involves placing N non-attacking
+queens on an N×N chessboard.
+
+Usage: nqueens N
+
+Arguments:
+    N (int): The size of the chessboard and the number of queens.
+
+The program prints every possible solution to the N Queens problem, one solution per line.
+
+Example:
+    $ ./nqueens.py 4
+    [[0, 1], [1, 3], [2, 0], [3, 2]]
+    [[0, 2], [1, 0], [2, 3], [3, 1]]
+
+    $ ./nqueens.py 6
+    [[0, 1], [1, 3], [2, 5], [3, 0], [4, 2], [5, 4]]
+    [[0, 2], [1, 5], [2, 1], [3, 4], [4, 0], [5, 3]]
+    [[0, 3], [1, 0], [2, 4], [3, 1], [4, 5], [5, 2]]
+    [[0, 4], [1, 2], [2, 0], [3, 5], [4, 3], [5, 1]]
+"""
 
 import sys
+import argparse
 
-
-def is_safe(board, row, col):
+def is_safe(queen, x, array):
     """
-    Check if placing a Queen at the given position (row, col) is safe.
+    Check if placing a queen at position (queen, x) is safe.
 
     Args:
-        board (list): The current state of the chessboard.
-        row (int): The row of the new Queen being placed.
-        col (int): The column of the new Queen being placed.
+        queen (int): The row position of the queen.
+        x (int): The column position of the queen.
+        array (List[List[int]]): The current board configuration.
 
     Returns:
-        bool: True if the position is safe, False otherwise.
+        bool: True if placing the queen at (queen, x) is safe, False otherwise.
     """
-    # Check for Queen in the same row
-    if 1 in board[row]:
-        return False
+    return all(abs(array[column] - x) != queen - column for column in range(queen))
 
-    # Check for Queen in the same column
-    if 1 in [board[i][col] for i in range(len(board))]:
-        return False
-
-    # Check for Queen in the diagonals
-    for i in range(len(board)):
-        if row + col - i < len(board) and row + col - i >= 0 and board[i][row + col - i] == 1:
-            return False
-        if row - col + i < len(board) and row - col + i >= 0 and board[i][row - col + i] == 1:
-            return False
-
-    return True
-
-
-def n_queens_helper(board, col, solutions):
+def generate_solutions(row, column, prev_solution):
     """
-    Helper function to find all valid solutions for placing N Queens.
+    Generate all solutions for the N Queens problem using backtracking.
 
     Args:
-        board (list): The current state of the chessboard.
-        col (int): The current column being considered.
-        solutions (list): List to store the valid solutions.
+        row (int): The row position of the current queen to be placed.
+        column (int): The size of the chessboard and the number of queens.
+        prev_solution (List[List[int]]): The previously placed queens' positions.
 
     Returns:
-        None
+        List[List[int]]: A list of all possible solutions for the N Queens problem.
     """
-    # Base case: All columns have been processed (reached the end)
-    if col == len(board):
-        # Append the current valid solution to the list of solutions
-        solutions.append([[i, row.index(1)] for i, row in enumerate(board)])
-        return
+    if row == column:
+        return prev_solution
+    solution = []
+    for queen in range(column):
+        if all(is_safe(row, queen, array) for array in prev_solution):
+            solution.extend(place_queen(queen, column, prev_solution))
+    return generate_solutions(row + 1, column, solution)
 
-    # Try placing the Queen in each row of the current column
-    for row in range(len(board)):
-        if is_safe(board, row, col):
-            # Place the Queen in the board
-            board[row][col] = 1
-            # Recursively explore the next column
-            n_queens_helper(board, col + 1, solutions)
-            # Backtrack by removing the Queen from the board to explore other possibilities
-            board[row][col] = 0
-
-
-def n_queens(n):
+def place_queen(queen, column, prev_solution):
     """
-    Find and print all valid solutions for placing N Queens on the chessboard.
+    Place a queen at position (queen, column) on the chessboard.
 
     Args:
-        n (int): The size of the chessboard (N).
+        queen (int): The row position of the queen to be placed.
+        column (int): The size of the chessboard and the number of queens.
+        prev_solution (List[List[int]]): The previously placed queens' positions.
 
     Returns:
-        None
+        List[List[int]]: A list of board configurations after placing the queen.
     """
-    # Validate the input value of N
-    if n < 4:
+    return [array + [queen] for array in prev_solution]
+
+def main():
+    """
+    Main function to solve the N Queens problem and print the solutions.
+    """
+    parser = argparse.ArgumentParser(description="Solves the N Queens problem.")
+    parser.add_argument("N", type=int, help="The size of the chessboard and the number of queens.")
+    args = parser.parse_args()
+
+    if args.N < 4:
         print("N must be at least 4")
         sys.exit(1)
 
-    # Create an empty NxN chessboard filled with zeros
-    board = [[0 for _ in range(n)] for _ in range(n)]
-    # List to store all valid solutions
-    solutions = []
+    solutions = generate_solutions(0, args.N, [[]])
+    for array in solutions:
+        print(array)
 
-    # Start the backtracking process to find all solutions
-    n_queens_helper(board, 0, solutions)
-
-    # Print each valid solution
-    for solution in solutions:
-        print(solution)
-
-
-if __name__ == '__main__':
-    # Validate the command-line argument and get the size of the chessboard (N)
-    if len(sys.argv) != 2 or not sys.argv[1].isdigit():
-        print("Usage: nqueens N")
-        sys.exit(1)
-    n = int(sys.argv[1])
-    # Call the main function to find and print all valid solutions
-    n_queens(n)
+if __name__ == "__main__":
+    main()
 
