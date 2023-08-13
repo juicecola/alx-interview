@@ -6,7 +6,7 @@ const request = require('request');
 // Get the movie ID from the command line arguments
 const movieId = process.argv[2];
 
-// Construct the URL for the movie endpoint
+// Construct the URL for movie endpoint
 const movieEndpoint = 'https://swapi-api.alx-tools.com/api/films/' + movieId;
 
 // Recursive function to send requests to character URLs
