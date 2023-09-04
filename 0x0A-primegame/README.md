@@ -1,0 +1,3 @@
+Maria and Ben are engaged in a strategic game. The game is played with a set of consecutive positive integers, starting from 1 up to and including a given number 'n'. In each round, they take turns choosing a prime number from the set and then remove that prime number along with all its multiples from the set. The player who cannot make a move loses the round.
+
+Maria and Ben play multiple rounds of the game, and 'n' can vary for each round. Assuming Maria always goes first and both players play optimally, your task is to determine who the winner is for each round and, ultimately, find out who won the most rounds.
